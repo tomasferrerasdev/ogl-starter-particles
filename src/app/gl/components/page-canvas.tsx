@@ -1,9 +1,6 @@
 "use client"
 
 import clsx from "clsx"
-import * as OGL from "ogl"
-import { useRef, useState } from "react"
-import { useFrame } from "react-ogl"
 
 import { WebGL } from "~/gl/tunnel"
 
@@ -13,62 +10,6 @@ import { useAppControls } from "../hooks/use-app-controls"
 import { RenderLoop } from "../render-loop"
 import { DebugStateMessages } from "./devex/debug-messages"
 import { Helpers } from "./devex/helpers"
-
-const hotpink = new OGL.Color(0xfba2d4)
-const orange = new OGL.Color(0xf5ce54)
-
-const Box = (props: JSX.IntrinsicElements["mesh"]) => {
-  const mesh = useRef<OGL.Mesh>(null!)
-  const [hovered, setHover] = useState(false)
-  const [active, setActive] = useState(false)
-
-  useFrame(() => (mesh.current.rotation.x += 0.01))
-
-  return (
-    <mesh
-      {...props}
-      ref={mesh}
-      scale={active ? 1.5 : 1}
-      onClick={() => setActive((value) => !value)}
-      onPointerOver={() => setHover(true)}
-      onPointerOut={() => setHover(false)}
-    >
-      <box />
-      <program
-        vertex={`
-          attribute vec3 position;
-          attribute vec3 normal;
-
-          uniform mat4 modelViewMatrix;
-          uniform mat4 projectionMatrix;
-          uniform mat3 normalMatrix;
-
-          varying vec3 vNormal;
-
-          void main() {
-            vNormal = normalize(normalMatrix * normal);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `}
-        fragment={`
-          precision highp float;
-
-          uniform vec3 uColor;
-          varying vec3 vNormal;
-
-          void main() {
-            vec3 normal = normalize(vNormal);
-            float lighting = dot(normal, normalize(vec3(10)));
-
-            gl_FragColor.rgb = uColor + lighting * 0.1;
-            gl_FragColor.a = 1.0;
-          }
-        `}
-        uniforms={{ uColor: hovered ? hotpink : orange }}
-      />
-    </mesh>
-  )
-}
 
 /** Canvas with main scene */
 const PageCanvas = () => {
@@ -105,8 +46,6 @@ const PageCanvas = () => {
             object={MAIN_CAMERA}
             position={[0, 0, 6.3]}
           />
-
-          <Box />
 
           <RenderLoop />
 
